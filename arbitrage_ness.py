@@ -22,8 +22,8 @@ TELEGRAM_TOKEN = config['TELEGRAM']['TOKEN']  # BotFather에게 받은 토큰
 TELEGRAM_CHAT_ID = config['TELEGRAM']['CHAT_ID']  # ID봇 등에게 받은 내 채팅방 ID
 
 SYMBOL = 'NESS/USDT'
-DIFFERENT_RATE = 0.5 # 차이 기준 퍼센트 (0.5%)
-DELAY_SECOND = 10
+DIFFERENT_RATE = 0.1 # 차이 기준 퍼센트 (0.5%)
+DELAY_SECOND = 60
 
 # 💡 1시간 알림 제한을 위한 시간 저장 변수
 # 시작하자마자 기회가 오면 바로 알림을 보낼 수 있도록 초기값은 현재 시간의 '1시간 전'으로 세팅합니다.
