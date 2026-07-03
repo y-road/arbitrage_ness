@@ -34,7 +34,7 @@ last_buy_exchange = None
 
 # 거래소 객체 생성
 bitget = ccxt.bitget()
-gateio = ccxt.gateio()
+gateio = ccxt.gate()
 
 start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 print(f"[{start_time}] 🚀 NESS 아비트리지 얼러트 시작...")
