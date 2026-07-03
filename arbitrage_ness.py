@@ -22,8 +22,9 @@ TELEGRAM_TOKEN = config['TELEGRAM']['TOKEN']  # BotFather에게 받은 토큰
 TELEGRAM_CHAT_ID = config['TELEGRAM']['CHAT_ID']  # ID봇 등에게 받은 내 채팅방 ID
 
 SYMBOL = 'NESS/USDT'
-DIFFERENT_RATE = 0.1 # 차이 기준 퍼센트 (0.5%)
+DIFFERENT_RATE = 0.5 # 차이 기준 퍼센트 (0.5%)
 DELAY_SECOND = 60
+COOLTIME_SECOND = 1800
 
 # 💡 1시간 알림 제한을 위한 시간 저장 변수
 # 시작하자마자 기회가 오면 바로 알림을 보낼 수 있도록 초기값은 현재 시간의 '1시간 전'으로 세팅합니다.
@@ -129,11 +130,11 @@ while True:
             # 직전 알림과 현재 매수 거래소 방향이 달라졌는가?
             is_exchange_changed = (last_buy_exchange != buy_exchange)
 
-            # 시간이 1시간(3600초) 이상 지났을 때만 알림 전송
-            if time_passed.total_seconds() >= 3600 or is_exchange_changed:
+            # 시간이 1시간(COOLTIME_SECOND 초) 이상 지났을 때만 알림 전송
+            if time_passed.total_seconds() >= COOLTIME_SECOND or is_exchange_changed:
 
                 # [추가] 거래소가 바뀐 조기 알림이라면 문구 변경
-                prefix = "🔄 [방향 전환] " if is_exchange_changed and time_passed.total_seconds() < 3600 else "🚨 "
+                prefix = "🔄 [방향 전환] " if is_exchange_changed and time_passed.total_seconds() < COOLTIME_SECOND else "🚨 "
                 alert_text = f"{prefix}[NESS 아비트리지 발생]\n{log_msg}"
 
                 send_telegram_message(alert_text)
@@ -144,8 +145,8 @@ while True:
 
                 print(f"📱 [Telegram] 1시간 제한 적용 - 알림 발송 완료 (다음 알림 가능 시간: {(now_dt + timedelta(hours=1)).strftime('%H:%M:%S')})")
             else:
-                # 1시간이 안 지났다면 로그만 찍고 텔레그램은 패스
-                remaining_time = 3600 - time_passed.total_seconds()
+                # COOLTIME_SECOND 시간이 안 지났다면 로그만 찍고 텔레그램은 패스
+                remaining_time = COOLTIME_SECOND - time_passed.total_seconds()
                 print(f"⏳ [Telegram] 알림 쿨다운 중... (남은 시간: {int(remaining_time)//60}분 {int(remaining_time)%60}초)")
             
             print("----------------------------------------------------------------------------")
