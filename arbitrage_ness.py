@@ -115,7 +115,7 @@ while True:
     try:
         now_dt = datetime.now()
         now_str = now_dt.strftime('%Y-%m-%d %H:%M:%S')
-        log(f"\n========== [{now_str}] LOOP START ==========")
+        log(f"========== [{now_str}] LOOP START ==========")
 
         # 매수/매도 담당 거래소를 저장할 이넘 변수 초기화
         buy_exchange = None
