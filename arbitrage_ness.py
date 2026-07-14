@@ -4,6 +4,51 @@ import time
 from datetime import datetime, timedelta
 import requests  # 텔레그램 메시지 전송용
 import configparser
+import logging
+from logging.handlers import TimedRotatingFileHandler
+import os
+
+# ==========================================================
+# Logger 설정
+# ==========================================================
+os.makedirs("logs", exist_ok=True)
+
+logger = logging.getLogger("Arbitrage")
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter(
+    "[%(asctime)s] %(levelname)s %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+
+# 콘솔 출력
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(formatter)
+
+# 날짜별 로그 파일 생성
+file_handler = TimedRotatingFileHandler(
+    filename="logs/arbitrage.log",
+    when="midnight",
+    interval=1,
+    backupCount=30,
+    encoding="utf-8"
+)
+file_handler.suffix = "%Y-%m-%d"
+file_handler.setFormatter(formatter)
+
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+
+# ==========================================================
+# 0. Print & Logger 함수 정의
+# ==========================================================
+def log(message):
+    print(message)
+    logger.info(message)
+
+def error(message):
+    print(message)
+    logger.error(message)
 
 # ==========================================================
 # 1. 이넘(Enum) 클래스 선언
@@ -44,7 +89,7 @@ gateio = ccxt.gate({
 })
 
 start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-print(f"[{start_time}] 🚀 NESS Arbitrage Start...")
+log(f"[{start_time}] 🚀 NESS Arbitrage Start...")
 
 # ==========================================================
 # 3. 텔레그램 전송 함수 정의
@@ -59,9 +104,9 @@ def send_telegram_message(message):
     try:
         response = requests.post(url, json=payload)
         if response.status_code != 200:
-            print(f"★ [LOG] ❌ [Telegram] 전송 실패 (코드: {response.status_code})")
+            log(f"★ [LOG] ❌ [Telegram] 전송 실패 (코드: {response.status_code})")
     except Exception as e:
-        print(f"★ [LOG] ❌ [Telegram] 에러 발생: {e}")
+        log(f"★ [LOG] ❌ [Telegram] 에러 발생: {e}")
 
 # ==========================================================
 # 4. 메인 실행 루프
@@ -70,7 +115,7 @@ while True:
     try:
         now_dt = datetime.now()
         now_str = now_dt.strftime('%Y-%m-%d %H:%M:%S')
-        print(f"\n========== [{now_str}] LOOP START ==========")
+        log(f"\n========== [{now_str}] LOOP START ==========")
 
         # 매수/매도 담당 거래소를 저장할 이넘 변수 초기화
         buy_exchange = None
@@ -79,7 +124,7 @@ while True:
         # 양쪽 거래소 자산 정보 불러오기
         bg_balance = bitget.fetch_balance()
         gate_balance = gateio.fetch_balance()
-        print("★ [LOG] Balance fetched successfully")
+        log("★ [LOG] Balance fetched successfully")
 
         balances = {
             Exchange.BITGET: bg_balance,
@@ -102,7 +147,7 @@ while True:
         gate_ask = gate_orderbook['asks'][0][0] # 내가 살 수 있는 가장 낮은 가격 (매도 1호가)
         gate_ask_vol = gate_orderbook['asks'][0][1] # 해당 호가의 잔량
 
-        print(
+        log(
             f"★ [LOG] Orderbook "
             f"BG Ask:{bg_ask} Bid:{bg_bid} | "
             f"Gate Ask:{gate_ask} Bid:{gate_bid}"
@@ -122,7 +167,7 @@ while True:
                 "buy_vol": bg_ask_vol,
                 "sell_price": gate_bid,
                 "sell_vol": gate_bid_vol,
-                "label": "BITGET ➡️ GATEIO"
+                "label": "BITGET -> GATEIO"
             },
             { # case 2: 게이트에서 사서 ➡️ 비트겟에 파는 경우
                 "buy": Exchange.GATEIO,
@@ -131,13 +176,13 @@ while True:
                 "buy_vol": gate_ask_vol,
                 "sell_price": bg_bid,
                 "sell_vol": bg_bid_vol,
-                "label": "GATEIO ➡️ BITGET"
+                "label": "GATEIO -> BITGET"
             }
         ]
 
         for case in cases:
             percent = ((case["sell_price"] - case["buy_price"]) / case["buy_price"]) * 100
-            print(
+            log(
                 f"★ [LOG] {case['label']} "
                 f"{percent:.3f}%"
             )
@@ -147,7 +192,7 @@ while True:
                 best_case = case
 
         if best_case is None:
-            print("★ [LOG] No arbitrage opportunity")
+            log("★ [LOG] No arbitrage opportunity")
             time.sleep(DELAY_SECOND)
             continue
 
@@ -164,7 +209,7 @@ while True:
                 f"(가격: {best_case['sell_price']} / 수량: {best_case['sell_vol']:.2f})"
             )
 
-            print(log_msg)
+            log(log_msg)
 
         # buy, sell 거래소의 자산 정보를 대입
         buy_exchange_available_usdt = balances[buy_exchange]['free'].get['USDT', 0] # buy_exchange의 Available USDT
@@ -174,12 +219,12 @@ while True:
         sell_exchange_available_ness_usdt = (sell_exchange_available_ness * best_case['sell_price']) # sell_exchange의 Available NESS를 USDT로 환산한 값
         sell_exchange_bid_volume_usdt = (best_case['sell_price'] * best_case['sell_vol']) # sell_exchange의 매수 1호가 물량을 USDT로 환산한 값
 
-        print("★ [LOG] Asset Check")
-        print(f" buy_exchange의 Available USDT                    : {buy_exchange_available_usdt}")
-        print(f" buy_exchange의 매도 1호가 물량을 USDT로 환산한 값    : {buy_exchange_ask_volume_usdt}")
-        print(f" sell_exchange의 Available NESS                   : {sell_exchange_available_ness}")
-        print(f" sell_exchange의 Available NESS를 USDT로 환산한 값  : {sell_exchange_available_ness_usdt}")
-        print(f" sell_exchange의 매수 1호가 물량을 USDT로 환산한 값   : {sell_exchange_bid_volume_usdt}")
+        log("★ [LOG] Asset Check")
+        log(f" buy_exchange의 Available USDT                    : {buy_exchange_available_usdt}")
+        log(f" buy_exchange의 매도 1호가 물량을 USDT로 환산한 값    : {buy_exchange_ask_volume_usdt}")
+        log(f" sell_exchange의 Available NESS                   : {sell_exchange_available_ness}")
+        log(f" sell_exchange의 Available NESS를 USDT로 환산한 값  : {sell_exchange_available_ness_usdt}")
+        log(f" sell_exchange의 매수 1호가 물량을 USDT로 환산한 값   : {sell_exchange_bid_volume_usdt}")
 
         min_usdt = min(
             buy_exchange_available_usdt,
@@ -189,15 +234,15 @@ while True:
             )
         
         
-        print(f" Minimum USDT   : {min_usdt}")
+        log(f" Minimum USDT   : {min_usdt}")
 
         if min_usdt < 1.5:
-            print(f"★ [LOG] Skip - Tradable USDT too small ({min_usdt:.4f})")
+            log(f"★ [LOG] Skip - Tradable USDT too small ({min_usdt:.4f})")
             continue
 
         tradable_usdt = min_usdt
 
-        print(f" Tradable USDT   : {tradable_usdt}")
+        log(f" Tradable USDT   : {tradable_usdt}")
 
         exchanges = {
             Exchange.BITGET: bitget,
@@ -210,31 +255,31 @@ while True:
         buy_trade_amount = int(tradable_usdt / best_case['buy_price'])
         sell_trade_amount = int(tradable_usdt / best_case['sell_price'])
 
-        print(
+        log(
             f"★ [LOG] "
             f"Buy Amount={buy_trade_amount}, "
             f"Sell Amount={sell_trade_amount}"
         )
 
         if buy_trade_amount == 0 or sell_trade_amount == 0:
-            print("★ [LOG] Skip - Trade amount is zero")
+            log("★ [LOG] Skip - Trade amount is zero")
             continue
 
-        print("★ [LOG] Sending BUY order...")
+        log("★ [LOG] Sending BUY order...")
         exchanges[buy_exchange].create_limit_buy_order(
             SYMBOL,
             buy_trade_amount,
             best_case['buy_price']
         )
-        print("★ [LOG] BUY order sent")
+        log("★ [LOG] BUY order sent")
         
-        print("★ [LOG] Sending SELL order...")
+        log("★ [LOG] Sending SELL order...")
         exchanges[sell_exchange].create_limit_sell_order(
             SYMBOL,
             sell_trade_amount,
             best_case['sell_price']
         )
-        print("★ [LOG] SELL order sent")
+        log("★ [LOG] SELL order sent")
 
         after_trading_dt = datetime.now()
         after_trading_str = after_trading_dt.strftime('%Y-%m-%d %H:%M:%S')
@@ -257,17 +302,17 @@ while True:
             f"주문금액: {sell_trade_amount * best_case['sell_price']:.4f} USDT"
         )
 
-        print(trade_log)
+        log(trade_log)
 
-        print("★ [LOG] Sending Telegram...")
+        log("★ [LOG] Sending Telegram...")
         send_telegram_message(trade_log)
-        print("★ [LOG] Telegram Done")
+        log("★ [LOG] Telegram Done")
         
-        print("========== LOOP END ==========\n")
+        log("========== LOOP END ==========\n")
 
         # DELAY_SECOND 초에 한 번씩 조회 (과도한 요청으로 인한 IP 차단 방지)
         time.sleep(DELAY_SECOND)
         
     except Exception as e:
-        print(f"에러 발생: {e}")
+        error(f"에러 발생: {e}")
         time.sleep(DELAY_SECOND)
