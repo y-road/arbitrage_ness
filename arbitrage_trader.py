@@ -43,11 +43,11 @@ logger.addHandler(file_handler)
 # 0. Print & Logger 함수 정의
 # ==========================================================
 def log(message):
-    print(message)
+    # print(message)
     logger.info(message)
 
 def error(message):
-    print(message)
+    # print(message)
     logger.error(message)
 
 # ==========================================================
@@ -201,7 +201,6 @@ while True:
             sell_exchange = best_case["sell"]
 
             log_msg = (
-                f"{now_str} "
                 f"[{best_case['label']}] 차이: {best_percent:.2f}% "
                 f"매수: {buy_exchange.value.upper()} "
                 f"(가격: {best_case['buy_price']} / 수량: {best_case['buy_vol']:.2f}) "
@@ -220,11 +219,11 @@ while True:
         sell_exchange_bid_volume_usdt = (best_case['sell_price'] * best_case['sell_vol']) # sell_exchange의 매수 1호가 물량을 USDT로 환산한 값
 
         log("★ [LOG] Asset Check")
-        log(f" buy_exchange의 Available USDT                    : {buy_exchange_available_usdt}")
-        log(f" buy_exchange의 매도 1호가 물량을 USDT로 환산한 값    : {buy_exchange_ask_volume_usdt}")
-        log(f" sell_exchange의 Available NESS                   : {sell_exchange_available_ness}")
-        log(f" sell_exchange의 Available NESS를 USDT로 환산한 값  : {sell_exchange_available_ness_usdt}")
-        log(f" sell_exchange의 매수 1호가 물량을 USDT로 환산한 값   : {sell_exchange_bid_volume_usdt}")
+        log(f" buy_exchange의 Available USDT : {buy_exchange_available_usdt}")
+        log(f" buy_exchange의 매도 1호가 물량을 USDT로 환산한 값 : {buy_exchange_ask_volume_usdt}")
+        log(f" sell_exchange의 Available NESS : {sell_exchange_available_ness}")
+        log(f" sell_exchange의 Available NESS를 USDT로 환산한 값 : {sell_exchange_available_ness_usdt}")
+        log(f" sell_exchange의 매수 1호가 물량을 USDT로 환산한 값 : {sell_exchange_bid_volume_usdt}")
 
         min_usdt = min(
             buy_exchange_available_usdt,
