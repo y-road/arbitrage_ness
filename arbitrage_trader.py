@@ -201,21 +201,21 @@ while True:
             sell_exchange = best_case["sell"]
 
             log_msg = (
-                f"{now_str}\n"
-                f"[{best_case['label']}] 차이: {best_percent:.2f}%\n"
-                f"매수: {buy_exchange.value.upper()}\n"
-                f"(가격: {best_case['buy_price']} / 수량: {best_case['buy_vol']:.2f})\n"
-                f"매도: {sell_exchange.value.upper()}\n"
+                f"{now_str} "
+                f"[{best_case['label']}] 차이: {best_percent:.2f}% "
+                f"매수: {buy_exchange.value.upper()} "
+                f"(가격: {best_case['buy_price']} / 수량: {best_case['buy_vol']:.2f}) "
+                f"매도: {sell_exchange.value.upper()} "
                 f"(가격: {best_case['sell_price']} / 수량: {best_case['sell_vol']:.2f})"
             )
 
             log(log_msg)
 
         # buy, sell 거래소의 자산 정보를 대입
-        buy_exchange_available_usdt = balances[buy_exchange]['free'].get['USDT', 0] # buy_exchange의 Available USDT
+        buy_exchange_available_usdt = balances[buy_exchange]['free'].get('USDT', 0) # buy_exchange의 Available USDT
         buy_exchange_ask_volume_usdt = (best_case['buy_price'] * best_case['buy_vol']) # buy_exchange의 매도 1호가 물량을 USDT로 환산한 값
 
-        sell_exchange_available_ness = balances[sell_exchange]['free'].get['NESS', 0] # sell_exchange의 Available NESS
+        sell_exchange_available_ness = balances[sell_exchange]['free'].get('NESS', 0) # sell_exchange의 Available NESS
         sell_exchange_available_ness_usdt = (sell_exchange_available_ness * best_case['sell_price']) # sell_exchange의 Available NESS를 USDT로 환산한 값
         sell_exchange_bid_volume_usdt = (best_case['sell_price'] * best_case['sell_vol']) # sell_exchange의 매수 1호가 물량을 USDT로 환산한 값
 
