@@ -214,7 +214,22 @@ while True:
                 f"(가격: {best_case['sell_price']} / 수량: {best_case['sell_vol']:.2f})"
             )
 
+            arbitrage_telegram_message = (
+                f"🚨 [Arbitrage Opportunity]\n"
+                f"Direction : {best_case['label']}\n"
+                f"Spread    : {best_percent:.2f}%\n\n"
+                f"[BUY]\n"
+                f"Exchange  : {buy_exchange.value.upper()}\n"
+                f"Price     : {best_case['buy_price']}\n"
+                f"Volume    : {best_case['buy_vol']:.2f}\n\n"
+                f"[SELL]\n"
+                f"Exchange  : {sell_exchange.value.upper()}\n"
+                f"Price     : {best_case['sell_price']}\n"
+                f"Volume    : {best_case['sell_vol']:.2f}"
+            )
+
             log(log_msg)
+            send_telegram_message(arbitrage_telegram_message)
 
         # buy, sell 거래소의 자산 정보를 대입
         buy_exchange_available_usdt = balances[buy_exchange]['free'].get('USDT', 0) # buy_exchange의 Available USDT
