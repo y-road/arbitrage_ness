@@ -34,6 +34,12 @@ file_handler = TimedRotatingFileHandler(
     encoding="utf-8"
 )
 file_handler.suffix = "%Y-%m-%d"
+
+# 파일명 변경
+file_handler.namer = lambda default_name: (
+    f"logs/{os.path.basename(default_name).split('.')[-1]}_arbitrage.log"
+)
+
 file_handler.setFormatter(formatter)
 
 logger.addHandler(console_handler)
