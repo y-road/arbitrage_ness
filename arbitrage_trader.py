@@ -75,7 +75,7 @@ TELEGRAM_CHAT_ID = config['TELEGRAM']['CHAT_ID']  # ID봇 등에게 받은 내 �
 SYMBOL = 'NESS/USDT'
 DIFFERENT_RATE = 0.5 # 차이 기준 퍼센트 (0.5%)
 DELAY_SECOND = 60
-MIN_TRADE_USDT = 1.5
+MIN_TRADE_USDT = 3.1
 
 start_dt = datetime.now()
 
