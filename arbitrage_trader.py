@@ -73,7 +73,7 @@ TELEGRAM_TOKEN = config['TELEGRAM']['TOKEN']  # BotFather에게 받은 토큰
 TELEGRAM_CHAT_ID = config['TELEGRAM']['CHAT_ID']  # ID봇 등에게 받은 내 채팅방 ID
 
 SYMBOL = 'NESS/USDT'
-DIFFERENT_RATE = 0.5 # 차이 기준 퍼센트 (0.5%)
+DIFFERENT_RATE = 0.6 # 차이 기준 퍼센트 (0.6%)
 DELAY_SECOND = 60
 MIN_TRADE_USDT = 3.1
 
