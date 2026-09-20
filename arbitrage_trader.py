@@ -238,7 +238,7 @@ while True:
             f"매도: {sell_exchange.value.upper()} "
             f"(가격: {best_case['sell_price']} / 수량: {best_case['sell_vol']:.2f})"
         )
-        log(log_msg)g
+        log(log_msg)
 
         # ==========================================================
         # 1시간마다 한 번만 차익 알림 전송
