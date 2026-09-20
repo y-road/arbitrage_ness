@@ -198,7 +198,8 @@ while True:
                 "buy_vol": bg_ask_vol,
                 "sell_price": gate_bid,
                 "sell_vol": gate_bid_vol,
-                "label": "BITGET -> GATEIO"
+                "label": "BITGET -> GATEIO",
+                "min_rate": DIFFERENT_RATE_BG_TO_GATE  # 1.0%
             },
             { # case 2: 게이트에서 사서 ➡️ 비트겟에 파는 경우
                 "buy": Exchange.GATEIO,
@@ -207,7 +208,8 @@ while True:
                 "buy_vol": gate_ask_vol,
                 "sell_price": bg_bid,
                 "sell_vol": bg_bid_vol,
-                "label": "GATEIO -> BITGET"
+                "label": "GATEIO -> BITGET",
+                "min_rate": DIFFERENT_RATE_GATE_TO_BG  # 0.6%
             }
         ]
 
@@ -218,7 +220,7 @@ while True:
                 f"{percent:.3f}%"
             )
 
-            if percent >= DIFFERENT_RATE and percent > best_percent:
+            if percent >= case["min_rate"] and percent > best_percent:
                 best_percent = percent
                 best_case = case
 
@@ -236,7 +238,7 @@ while True:
             f"매도: {sell_exchange.value.upper()} "
             f"(가격: {best_case['sell_price']} / 수량: {best_case['sell_vol']:.2f})"
         )
-        log(log_msg)
+        log(log_msg)g
 
         # ==========================================================
         # 1시간마다 한 번만 차익 알림 전송
